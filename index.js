@@ -24,6 +24,12 @@ function addListeners() {
             const block = document.getElementById('fadeOutBlock');
             animaster().fadeOut(block, 1000);
         });
+
+    document.getElementById('showAndHidePlay')
+        .addEventListener('click', function () {
+            const block = document.getElementById('showAndHideBlock');
+            animaster().showAndHide(block, 1000);
+        });
 }
 
 
@@ -78,6 +84,11 @@ function animaster() {
         scale(element, duration, ratio) {
             element.style.transitionDuration = `${duration}ms`;
             element.style.transform = getTransform(null, ratio);
+        },
+
+        showAndHide(element, duration) {
+            this.fadeIn(element, duration / 3);
+            setTimeout(this.fadeOut, duration / 3, element, duration / 3)
         }
     }
 }
