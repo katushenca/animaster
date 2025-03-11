@@ -46,7 +46,7 @@ function addListeners() {
 
     document.getElementById('heartBeatingStop')
         .addEventListener('click', function () {
-            heartBeating.stop();
+            heartBeating.stop.call(heartBeating);
         });
 }
 
@@ -66,24 +66,24 @@ function animaster() {
 
     let timer = null;
 
-    function resetFadeIn(element){
+    function resetFadeIn(element) {
         element.style.transitionDuration = null;
         element.classList.add('hide');
         element.classList.remove('show');
     }
 
-    function resetFadeOut(element){
+    function resetFadeOut(element) {
         element.style.transitionDuration = null;
         element.classList.add('show');
         element.classList.remove('hide');
     }
 
-    function resetMove(element){
+    function resetMove(element) {
         element.style.transitionDuration = null;
         element.style.transform = null;
     }
 
-    function resetScale(element){
+    function resetScale(element) {
         element.style.transitionDuration = null;
         element.style.transform = null;
     }
@@ -153,7 +153,7 @@ function animaster() {
         },
 
         heartBeating(element, duration) {
-            let timer = setInterval(() => {
+            timer = setInterval(() => {
                 this.scale(element, duration / 2, 1.4);
                 setTimeout(this.scale, duration / 2, element, duration / 2, 1 / 1.4);
             }, duration);
