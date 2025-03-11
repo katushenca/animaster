@@ -1,6 +1,6 @@
 addListeners();
 let heartBeating = null;
-
+let moveAndHideAnimation = null;
 function addListeners() {
     document.getElementById('fadeInPlay')
         .addEventListener('click', function () {
@@ -31,22 +31,27 @@ function addListeners() {
             const block = document.getElementById('showAndHideBlock');
             animaster().showAndHide(block, 1000);
         });
+    document.getElementById('moveAndHideReset')
+        .addEventListener('click', function () {
+            if (moveAndHideAnimation) {
+                moveAndHideAnimation.reset();
+            }
+        });
 
     document.getElementById('moveAndHidePlay')
         .addEventListener('click', function () {
             const block = document.getElementById('moveAndHideBlock');
-            animaster().moveAndHide(block, 1000, {x: 100, y: 20});
-        })
-
+            moveAndHideAnimation = animaster().moveAndHide(block, 1000, {x: 100, y: 20});
+        });
     document.getElementById('heartBeatingPlay')
         .addEventListener('click', function () {
             const block = document.getElementById('heartBeatingBlock');
             heartBeating = animaster().heartBeating(block, 1000);
-        })
+        });
 
     document.getElementById('heartBeatingStop')
         .addEventListener('click', function () {
-            heartBeating.stop.call(heartBeating);
+            heartBeating.stop();
         });
 }
 
@@ -143,8 +148,19 @@ function animaster() {
         },
 
         moveAndHide(element, duration, translation) {
-            this.move(element, 2 * duration / 5, translation);
-            setTimeout(this.fadeOut, 2 * duration / 5, element, 3 * duration / 5);
+            const moveDuration = (2 * duration) / 5;
+            this.move(element, moveDuration, translation);
+            const hideDuration = (3 * duration) / 5;
+            const hideTimeout = setTimeout(() => {
+                this.fadeOut(element, hideDuration);
+            }, moveDuration);
+            return {
+                reset: () => {
+                    clearTimeout(hideTimeout);
+                    resetMove(element);
+                    resetFadeOut(element);
+                }
+            };
         },
 
         showAndHide(element, duration) {
@@ -155,9 +171,10 @@ function animaster() {
         heartBeating(element, duration) {
             timer = setInterval(() => {
                 this.scale(element, duration / 2, 1.4);
-                setTimeout(this.scale, duration / 2, element, duration / 2, 1 / 1.4);
+                setTimeout(() => {
+                    this.scale(element, duration / 2, 1);
+                }, duration / 2);
             }, duration);
-
             return {
                 stop: () => {
                     clearInterval(timer);
