@@ -56,21 +56,9 @@ function addListeners() {
 }
 
 
-function getTransform(translation, ratio) {
-    const result = [];
-    if (translation) {
-        result.push(`translate(${translation.x}px,${translation.y}px)`);
-    }
-    if (ratio) {
-        result.push(`scale(${ratio})`);
-    }
-    return result.join(' ');
-}
-
 function animaster() {
-
+    let _steps = [];
     let timer = null;
-
     function resetFadeIn(element) {
         element.style.transitionDuration = null;
         element.classList.add('hide');
@@ -93,60 +81,117 @@ function animaster() {
         element.style.transform = null;
     }
 
+    function _applyMove(element, duration, translation) {
+        resetMove(element);
+        setTimeout(() => {
+            element.style.transitionDuration = `${duration}ms`;
+            element.style.transform = getTransform(translation, null);
+        }, 0);
+    }
+
+    function _applyScale(element, duration, ratio) {
+        resetScale(element);
+        setTimeout(() => {
+            element.style.transitionDuration = `${duration}ms`;
+            element.style.transform = getTransform(null, ratio);
+        }, 0);
+    }
+
+    function _applyFadeIn(element, duration) {
+        resetFadeIn(element);
+        setTimeout(() => {
+            element.style.transitionDuration = `${duration}ms`;
+            element.classList.remove('hide');
+            element.classList.add('show');
+        }, 0);
+    }
+
+    function _applyFadeOut(element, duration) {
+        resetFadeOut(element);
+        setTimeout(() => {
+            element.style.transitionDuration = `${duration}ms`;
+            element.classList.remove('show');
+            element.classList.add('hide');
+        }, 0);
+    }
     return {
-        /**
-         * Блок плавно появляется из прозрачного.
-         * @param element — HTMLElement, который надо анимировать
-         * @param duration — Продолжительность анимации в миллисекундах
-         */
-
-        fadeOut(element, duration) {
-            resetFadeOut(element);
-            setTimeout(() => {
-                element.style.transitionDuration = `${duration}ms`;
-                element.classList.remove('show');
-                element.classList.add('hide');
-            }, 0);
+        addMove(duration, translation) {
+            _steps.push({
+                name: 'move',
+                duration,
+                translation
+            });
+            return this;
         },
-
-        fadeIn(element, duration) {
-            resetFadeIn(element);
-            setTimeout(() => {
-                element.style.transitionDuration = `${duration}ms`;
-                element.classList.remove('hide');
-                element.classList.add('show');
-            }, 1);
+        addScale(duration, ratio) {
+            _steps.push({
+                name: 'scale',
+                duration,
+                ratio
+            });
+            return this;
         },
+        addFadeIn(duration) {
+            _steps.push({
+                name: 'fadeIn',
+                duration
+            });
+            return this;
+        },
+        addFadeOut(duration) {
+            _steps.push({
+                name: 'fadeOut',
+                duration
+            });
+            return this;
+        },
+        play(element) {
+            let delay = 0;
 
-        /**
-         * Функция, передвигающая элемент
-         * @param element — HTMLElement, который надо анимировать
-         * @param duration — Продолжительность анимации в миллисекундах
-         * @param translation — объект с полями x и y, обозначающими смещение блока
-         */
+            _steps.forEach(step => {
+                switch (step.name) {
+                    case 'move':
+                        setTimeout(() => {
+                            _applyMove(element, step.duration, step.translation);
+                        }, delay);
+                        delay += step.duration;
+                        break;
+
+                    case 'scale':
+                        setTimeout(() => {
+                            _applyScale(element, step.duration, step.ratio);
+                        }, delay);
+                        delay += step.duration;
+                        break;
+
+                    case 'fadeIn':
+                        setTimeout(() => {
+                            _applyFadeIn(element, step.duration);
+                        }, delay);
+                        delay += step.duration;
+                        break;
+
+                    case 'fadeOut':
+                        setTimeout(() => {
+                            _applyFadeOut(element, step.duration);
+                        }, delay);
+                        delay += step.duration;
+                        break;
+                }
+            });
+        },
         move(element, duration, translation) {
-            resetMove(element);
-            setTimeout(() => {
-                element.style.transitionDuration = `${duration}ms`;
-                element.style.transform = getTransform(translation, null);
-            }, 10)
-
+            _applyMove(element, duration, translation);
         },
-
-        /**
-         * Функция, увеличивающая/уменьшающая элемент
-         * @param element — HTMLElement, который надо анимировать
-         * @param duration — Продолжительность анимации в миллисекундах
-         * @param ratio — во сколько раз увеличить/уменьшить. Чтобы уменьшить, нужно передать значение меньше 1
-         */
         scale(element, duration, ratio) {
-            resetScale(element)
-            setTimeout(() => {
-                element.style.transitionDuration = `${duration}ms`;
-                element.style.transform = getTransform(null, ratio);
-            }, 10);
+            _applyScale(element, duration, ratio);
         },
-
+        fadeIn(element, duration) {
+            _applyFadeIn(element, duration);
+        },
+        fadeOut(element, duration) {
+            _applyFadeOut(element, duration);
+        },
         moveAndHide(element, duration, translation) {
             const moveDuration = (2 * duration) / 5;
             this.move(element, moveDuration, translation);
@@ -165,7 +210,7 @@ function animaster() {
 
         showAndHide(element, duration) {
             this.fadeIn(element, duration / 3);
-            setTimeout(this.fadeOut, duration / 3, element, duration / 3)
+            setTimeout(this.fadeOut, duration / 3, element, duration / 3);
         },
 
         heartBeating(element, duration) {
@@ -181,5 +226,16 @@ function animaster() {
                 }
             };
         }
+    };
+}
+
+function getTransform(translation, ratio) {
+    const result = [];
+    if (translation) {
+        result.push(`translate(${translation.x}px,${translation.y}px)`);
     }
+    if (ratio) {
+        result.push(`scale(${ratio})`);
+    }
+    return result.join(' ');
 }
