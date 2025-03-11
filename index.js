@@ -51,6 +51,29 @@ function getTransform(translation, ratio) {
 }
 
 function animaster() {
+
+    function resetFadeIn(element){
+        element.style.transitionDuration = null;
+        element.classList.add('hide');
+        element.classList.remove('show');
+    }
+
+    function resetFadeOut(element){
+        element.style.transitionDuration = null;
+        element.classList.add('show');
+        element.classList.remove('hide');
+    }
+
+    function resetMove(element){
+        element.style.transitionDuration = null;
+        element.style.transform = null;
+    }
+
+    function resetScale(element){
+        element.style.transitionDuration = null;
+        element.style.transform = null;
+    }
+
     return {
         /**
          * Блок плавно появляется из прозрачного.
@@ -59,15 +82,21 @@ function animaster() {
          */
 
         fadeOut(element, duration) {
-            element.style.transitionDuration = `${duration}ms`;
-            element.classList.remove('show');
-            element.classList.add('hide');
+            resetFadeOut(element);
+            setTimeout(() => {
+                element.style.transitionDuration = `${duration}ms`;
+                element.classList.remove('show');
+                element.classList.add('hide');
+            }, 0);
         },
 
         fadeIn(element, duration) {
-            element.style.transitionDuration = `${duration}ms`;
-            element.classList.remove('hide');
-            element.classList.add('show');
+            resetFadeIn(element);
+            setTimeout(() => {
+                element.style.transitionDuration = `${duration}ms`;
+                element.classList.remove('hide');
+                element.classList.add('show');
+            }, 1);
         },
 
         /**
@@ -77,8 +106,12 @@ function animaster() {
          * @param translation — объект с полями x и y, обозначающими смещение блока
          */
         move(element, duration, translation) {
-            element.style.transitionDuration = `${duration}ms`;
-            element.style.transform = getTransform(translation, null);
+            resetMove(element);
+            setTimeout(() => {
+                element.style.transitionDuration = `${duration}ms`;
+                element.style.transform = getTransform(translation, null);
+            }, 10)
+
         },
 
         /**
@@ -88,8 +121,11 @@ function animaster() {
          * @param ratio — во сколько раз увеличить/уменьшить. Чтобы уменьшить, нужно передать значение меньше 1
          */
         scale(element, duration, ratio) {
-            element.style.transitionDuration = `${duration}ms`;
-            element.style.transform = getTransform(null, ratio);
+            resetScale(element)
+            setTimeout(() => {
+                element.style.transitionDuration = `${duration}ms`;
+                element.style.transform = getTransform(null, ratio);
+            }, 10);
         },
 
         moveAndHide(element, duration, translation) {
